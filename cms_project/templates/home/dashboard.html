@@ -1,0 +1,86 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <h4 class="mx-2">Dashboard</h4>
+    <div class="row w-75">
+
+            <div class="col stats">
+                <p>{{ clients.count }} </p>
+                <h6>Clients</h6>
+
+            </div>
+            <div class="col stats">
+                <p>{{ complaints.count }} 9 </p>
+                <h6>Complaints</h6>
+
+            </div>
+            <div class="col stats">
+                <p>{{ partners.count }} </p>
+                <h6>Partners</h6>
+            </div>
+
+    </div>
+    <h4 class="mx-2 mt-2">Recent Clients</h4>
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Client Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Complaints</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td>{{ client.user.username }}</td>
+                <td>{{ client.phone }}</td>
+                <td>{{ client.user.email }}</td>
+                <td>{{ client.address }} {{ client.city }}, {{ client.state }}, {{ client.zip_code }}</td>
+                <td>{{ client.complaints }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <style>
+        .custom-table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+            border-collapse: collapse;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .custom-table thead  {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+            background-color: #DBE2EF !important;
+            color: #3F72AF !important;
+            border-radius: 0.25rem;
+        }
+
+        .custom-table tbody + tbody {
+            border-top: 2px solid #dee2e6;
+        }
+
+        .custom-table tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.075);
+        }
+    </style>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,36 @@
+body{
+    background-color: #fff;
+    font-family: 'Roboto', sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+.table > thead > tr {
+    color: #3F72AF !important;
+    background-color: #DBE2EF !important;
+}
+
+
+.dark-button{
+    background-color: #112D4E;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.stats{
+    width: 90%;
+    margin: 20px;
+    padding: 20px;
+    background-color: #DBE2EF;
+    border-radius: 20px;
+    color: #112D4E;
+}
+.stats > p{
+    font-size: 24px;
+    font-weight: 500;
+    color: #112D4E;
+}

@@ -1,0 +1,29 @@
+{% include 'home/base.html' %}
+
+{% block accounts %}
+
+<div class="row" style="height: 100vh;">
+    <div class="col-md-5 d-flex justify-content-center align-items-center" style="background-color: #F9F7F7;">
+        <div class="w-75">
+                <h5 class="h4 my-3">Login To Your Account</h5>
+                <form action="{% url 'login' %}" method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="dark-button w-100">Login</button>
+                </form>
+            </div>
+        </div>
+    <div class="col-md-7" style="background-color: #DBE2EF;">
+
+    </div>
+
+</div>
+
+{% endblock accounts %}

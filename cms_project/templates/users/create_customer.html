@@ -1,0 +1,151 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<style>
+    .device-li {
+        cursor: pointer;
+        margin-top: 6px;
+        margin-bottom: 6px;
+
+    }
+    .device-li:hover {
+        background-color: rgb(255, 131, 131);
+        border: 1px solid red;
+        transition: 0.2s ease-in-out;
+    }
+</style>
+<div class="container mt-3">
+
+    <h4 class="mx-3" style="color:#3F72AF;">New Customer Account</h4>
+    <hr class="mx-3">
+    <div class="container px-3">
+        <div class="row">
+            <div class="col-md-6">
+                <h5>Basic Details</h5>
+                <form action="{% url 'create-customer' %}" method ="post">
+                    {% csrf_token %}    
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" class="form-control" id="name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Phone Number</label>
+                        <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Addhar Number</label>
+                        <input type="text" class="form-control" id="addhar_number" name="addhar_number" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Pan Number</label>
+                        <input type="text" class="form-control" id="pan_number" name="pan_number" required>
+                    </div>
+                    <h5 class="mt-3">Address Information</h5>
+                    <div class="form-group">
+                        <label for="name">Address</label>
+                        <input type="text" class="form-control" id="address" name="address" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">City</label>
+                        <input type="text" class="form-control" id="city" name="city" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">State</label>
+                        <input type="text" class="form-control" id="state" name="state" value="Punjab" >
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Pincode</label>
+                        <input type="text" class="form-control" id="pincode" name="pincode" >
+                    </div>
+            
+            </div>
+            <div class="col-md-6">
+                <h5 >Connection Information</h5>
+                    <div class="form-group">
+                        <label for="name">Plan Type</label>
+                        <input type="text" class="form-control" id="plan-type" name="plan_type" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">ISP Name</label>
+                        <input type="text" class="form-control" id="isp" name="isp" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Install Amount</label>
+                        <input type="text" class="form-control" id="install_amount" name="install_amount" >
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Bill Amount</label>
+                        <input type="text" class="form-control" id="bill_amount" name="bill_amount" >
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Payment Recieved</label>
+                        <input type="text" class="form-control" id="payment_recieved" name="payment_recieved" >
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Cable Type</label>
+                        <select class="form-select" id="cable_type" name="cable_type" required>
+                            {% for cable in cables %}
+                                <option value="{{cable.id}}">{{cable.name}} Rs.{{cable.price_per_unit}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Cable Length</label>
+                        <input type="text" class="form-control" id="cable_length" name="cable_length" >
+                    </div>
+                    <div class="form-group border-top mt-3 pt-3">
+                        <h5 for="name">Select Devices To Attach</h5>
+                        <select class="form-select mt-2" id="device" name="devices" required>
+                            {% for device in devices %}
+                                <option value="{{device.id}}">{{device.name}} Rs.{{device.price_per_unit}}</option>
+                            {% endfor %}
+                        </select>
+                        <p>Selected Devices</p>
+                        <ul class="list-group" id="selected-devices">
+                        </ul>
+                        <button class="btn btn-secondary" type="button">Add More</button>
+                    </div>
+                    <input type="text" name="devices_selected">
+                <button type="submit" class="dark-button mt-3">Create Customer</button>
+            </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let selectedDevices = [];
+    let devicesSelected = document.querySelector('input[name="devices_selected"]');
+    let deviceSelect = document.querySelector('select[name="devices"]');
+    let selectedDevicesList = document.querySelector('#selected-devices');
+    let addMoreButton = document.querySelector('button');
+
+    addMoreButton.addEventListener('click', () => {
+        let device = deviceSelect.options[deviceSelect.selectedIndex];
+        selectedDevices.push(device.value);
+        let li = document.createElement('li');
+        li.classList.add('list-group-item');
+        li.classList.add('device-li');
+
+        li.innerText = device.innerText;
+        li.addEventListener('click', () => {
+            selectedDevices = selectedDevices.filter((id) => id !== device.value);
+            li.remove();
+            devicesSelected.value = selectedDevices;
+        });
+        
+        li.setAttribute('data-device-id', device.value);
+        selectedDevicesList.appendChild(li);
+        devicesSelected.value = selectedDevices;
+    });
+
+
+</script>
+
+{% endblock %}

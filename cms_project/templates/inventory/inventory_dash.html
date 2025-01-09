@@ -1,0 +1,74 @@
+{% extends "home/base.html" %}
+
+{% block content %}
+<div class="container mt-3">
+    <h4 class="mx-2">Inventory</h4>
+    <div class="container">
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Search Device By Name " name="query" aria-label="Search" aria-describedby="button-addon2">
+                <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row w-75">
+        <div class="col stats">
+            <p>{{ total_devices }} </p>
+            <h6>Total Devices</h6>
+        </div>
+        <div class="col stats">
+            <p> {{ total_stock }} </p>
+            <h6>Stock</h6>
+        </div>
+        <div class="col stats">
+            <p>{{ total_stock_value }} </p>
+            <h6>Stock Value</h6>
+        </div>
+    </div>
+    <div class="d-flex">
+        <a href="{% url 'create-device' %}"><button class="btn btn-primary">Add New Device</button></a>
+    </div>
+    <h4 class="mx-2 mt-2">Devices</h4>
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Device Name</th>
+                <th>Device Type</th>
+                <th>Quantity</th>
+                <th>Stock Value</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for device in devices %}
+                <tr>
+                    <td>{{ device.name }}</td>
+                    <td>{{ device.device_type }}</td>
+                    <td>{{ device.quantity }} {{ device.units }}(s)</td>
+                    <td>{{ device.stock_value }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="pagination mx-auto">
+        <span class="step-links">
+            {% if devices.has_previous %}
+                <a href="?page=1">&laquo; first</a>
+                <a href="?page={{ devices.previous_page_number }}">previous</a>
+            {% endif %}
+
+            <span class="current">
+                Page {{ devices.number }} of {{ devices.paginator.num_pages }}.
+            </span>
+
+            {% if devices.has_next %}
+                <a href="?page={{ devices.next_page_number }}">next</a>
+                <a href="?page={{ devices.paginator.num_pages }}">last &raquo;</a>
+            {% endif %}
+        </span>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,86 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <h4 class="mx-2">Complaints</h4>
+    <div class="container">
+        <form action="{% url 'search_user' %}" method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Enter mobile number to start complaint" name="number" aria-label="Search" aria-describedby="button-addon2">
+                <input type="hidden" name="start_complaint" value="True">
+                <input type="hidden" name="user_search" value="False">
+                <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Start New Complaint</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="row w-75">
+
+            <div class="col stats">
+                <p>{{unique_client_complaints}} </p>
+                <h6>Total Clients</h6>
+
+            </div>
+            <div class="col stats">
+                <p> {{active_complaints.count}} </p>
+                <h6>Active Complaints</h6>
+
+            </div>
+            <div class="col stats">
+                <p>{{resolved_complaints.count}} </p>
+                <h6>Resolved Complaints</h6>
+            </div>
+
+    </div>
+
+    <h4 class="mx-2 mt-2">Technician Stats</h4>
+<div class="row w-100">
+    {% for technician in technicians %}
+        <div class="col stats">
+            <p>{{technician.get_complaints.count}} </p>
+            <h6>{{technician.user.username}}</h6>
+        </div>
+        <div class="col stats">
+            
+        </div>
+        <div class="col stats">
+            
+        </div>
+    {% endfor %}
+</div>
+    <!-- <div class="d-flex ">
+        <a href="{%  url 'create-customer' %}"><button class="btn btn-primary ">Add New Customer</button></a>
+        <a href="{%  url 'create-customer' %}"><button class="btn btn-dark mx-2">New Connection Request</button></a>
+        <a href="{%  url 'create-customer' %}"><button class="btn btn-secondary"></button></a>
+
+    </div> -->
+    <h4 class="mx-2 mt-2">Recent Complaints</h4>
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Client Name</th>
+                <th>Complaint Title</th>
+                <th>Description</th>
+                <th>Priority</th>
+                <th>Assigned To</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for complaint in active_complaints %}
+            <tr>
+                <td>{{ complaint.customer }}</td>
+                <td>{{ complaint.title }}</td>
+                <td>{{ complaint.description }}</td>
+                <td>{{ complaint.priority }} </td>
+                <td>{{ complaint.assigned_to.user }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    
+
+</div>
+
+{% endblock %}

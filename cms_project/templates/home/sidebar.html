@@ -1,0 +1,33 @@
+<div class="sidebar">
+    <div class="login-user">
+        <img src="https://cdn.britannica.com/42/233842-050-E64243D7/Pomeranian-dog.jpg" class="user-image" alt="user">
+        <div>
+            <h5 class="h6 m-0 p-0">{{request.user.username}}</h6>
+            <small class="m-0">
+                {% if request.user.is_superuser %}
+                Admin
+                {% else %}
+                {% for group in request.user.groups.all %}
+                    {{group}}
+                {% endfor %}
+                
+                {% endif %}
+            </small>
+        </div>
+    </div>
+    <ul>
+        <a href="{% url 'dashboard' %}"><li class="active"><div class="icon"><i class="fa fa-dashboard" aria-hidden="true"></i></div>Dashboard</li></a>
+        <a href="{% url 'complaints_dash' %}"><li> <div class="icon"><i class="fa-solid fa-comment"></i></div> Complaints</li></a>
+        <a href="{% url 'clients' %}"><li><div class="icon"><i class="fa-solid fa-users-gear"></i></div>Clients</li></a>
+        <a href="{% url 'inventory_dash' %}"><li><div class="icon"><i class="fa-solid fa-warehouse"></i></div>Inventory</li></a>
+
+        {% if  request.user.groups.all.0 == "Admin"  %}
+            <a href=""><li><div class="icon"><i class="fa-solid fa-handshake"></i></div>Partners</li></a>
+        {% endif %}
+            <a href=""><li><div class="icon"><i class="fa-solid fa-chalkboard-user"></i></div>Technicians</li></a>
+        {% if  request.user.groups.all.0 == "Staff"  %}
+        {% else %}
+            <a href=""><li><div class="icon"><i class="fa-solid fa-user-check"></i></div>Staff Members</li></a>
+        {% endif %}
+    </ul>
+</div>

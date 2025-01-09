@@ -1,0 +1,128 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+<div class="container mt-3">
+    <h4 class="mx-2">Clients</h4>
+    <div class="container">
+        <form action="{% url 'search_user' %}" method="post">
+            {% csrf_token %}
+            <div class="input-group mb-3">
+                <input type="text" class="form-control" placeholder="Search" name="number" aria-label="Search" aria-describedby="button-addon2">
+                <input type="hidden" name="start_complaint" value="False">
+                <input type="hidden" name="user_search" value="True">
+                <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
+            </div>
+        </form>
+    </div>
+    <div class="row w-75">
+
+            <div class="col stats">
+                <p>{{active_clients.count}} </p>
+                <h6>Active</h6>
+
+            </div>
+            <div class="col stats">
+                <p> {{inactive_clients.count}} </p>
+                <h6>Inactive</h6>
+
+            </div>
+            <div class="col stats">
+                <p>{{total}} </p>
+                <h6>Total</h6>
+            </div>
+
+    </div>
+
+    <div class="d-flex ">
+        <a href="{%  url 'create-customer' %}"><button class="btn btn-primary ">Add New Customer</button></a>
+        <a href="{%  url 'create-customer' %}"><button class="btn btn-dark mx-2">New Connection Request</button></a>
+        <a href="{%  url 'create-customer' %}"><button class="btn btn-secondary"></button></a>
+
+    </div>
+
+    <h4 class="mx-2 mt-2">Recent Clients</h4>
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>Client Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in recent_clients %}
+            <tr>
+                <td>{{ client.user.username }}</td>
+                <td>{{ client.phone }}</td>
+                <td>{{ client.user.email }}</td>
+                <td>{{ client.address }} {{ client.city }}, {{ client.state }}, {{ client.zip_code }}</td>
+                <td>{{ client.is_active }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <h4 class="mx-2 mt-2">ISP Stats</h4>
+    <table class="custom-table">
+        <thead>
+            <tr>
+                <th>ISP Name</th>
+                <th>Phone</th>
+                <th>Email</th>
+                <th>Address</th>
+                <th>Complaints</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for client in clients %}
+            <tr>
+                <td>{{ client.user.username }}</td>
+                <td>{{ client.phone }}</td>
+                <td>{{ client.user.email }}</td>
+                <td>{{ client.address }} {{ client.city }}, {{ client.state }}, {{ client.zip_code }}</td>
+                <td>{{ client.complaints }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <style>
+        .custom-table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: #212529;
+            border-collapse: collapse;
+        }
+
+        .custom-table th,
+        .custom-table td {
+            padding: 0.75rem;
+            vertical-align: top;
+            border-top: 1px solid #dee2e6;
+        }
+
+        .custom-table thead  {
+            vertical-align: bottom;
+            border-bottom: 2px solid #dee2e6;
+            background-color: #DBE2EF !important;
+            color: #3F72AF !important;
+            border-radius: 0.25rem;
+        }
+
+        .custom-table tbody + tbody {
+            border-top: 2px solid #dee2e6;
+        }
+
+        .custom-table tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .custom-table tbody tr:hover {
+            background-color: rgba(0, 0, 0, 0.075);
+        }
+    </style>
+
+</div>
+
+{% endblock %}
