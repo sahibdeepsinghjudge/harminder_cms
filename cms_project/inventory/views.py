@@ -5,9 +5,10 @@ from users.models import Partner, StaffMember
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import models
+from users.decorators import group_required
 # Create your views here.
 
-
+@group_required("Staff","Admin","Partner")
 @login_required
 def home(request):
     user = request.user
@@ -38,6 +39,9 @@ def home(request):
     }
     return render(request, "inventory/inventory_dash.html", context)
 
+
+
+@group_required("Staff","Admin","Partner")
 def create_device(req):
     user = req.user
 
@@ -87,6 +91,9 @@ def create_device(req):
     }
     return render(req, "inventory/create_device.html",context= context)
 
+
+
+@group_required("Staff","Admin","Partner")
 def view_and_update_device(req, id):
     if req.method=="POST":
         device = DeviceDetail.objects.get(id=id)

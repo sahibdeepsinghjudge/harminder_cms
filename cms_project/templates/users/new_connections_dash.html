@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container mt-3">
-    <h4 class="mx-2">Clients</h4>
+    <h4 class="mx-2">New Provisionings</h4>
     <div class="container">
         <form action="{% url 'search_user' %}" method="post">
             {% csrf_token %}
@@ -17,36 +17,29 @@
     <div class="row w-75">
 
             <div class="col stats">
-                <p>{{active_clients.count}} </p>
-                <h6>Active</h6>
+                <p>{{pending_conn.count}} </p>
+                <h6>Pending Connection Requests</h6>
 
             </div>
             <div class="col stats">
-                <p> {{inactive_clients.count}} </p>
-                <h6>Inactive</h6>
+                <p> {{conversions.count}} </p>
+                <h6>Conversions</h6>
 
             </div>
-            <div class="col stats">
-                <p>{{total}} </p>
-                <h6>Total</h6>
-            </div>
-
     </div>
 
     <div class="d-flex ">
         <a href="{%  url 'create-customer' %}"><button class="btn btn-primary ">Add New Customer</button></a>
         <a href="{%  url 'create-connection-request' %}"><button class="btn btn-dark mx-2">New Connection Provisioning</button></a>
-        <a href="{%  url 'create-customer' %}"><button class="btn btn-secondary"></button></a>
-
     </div>
 
-    <h4 class="mx-2 mt-2">Recent Clients</h4>
+    <h4 class="mx-2 mt-2">Recent Requests</h4>
     <table class="custom-table">
         <thead>
             <tr>
                 <th>Client Name</th>
                 <th>Phone</th>
-                <th>Email</th>
+                <th>description</th>
                 <th>Address</th>
                 <th>Status</th>
             </tr>
@@ -54,16 +47,16 @@
         <tbody>
             {% for client in recent_clients %}
             <tr>
-                <td>{{ client.user.username }}</td>
-                <td>{{ client.phone }}</td>
-                <td>{{ client.user.email }}</td>
-                <td>{{ client.address }} {{ client.city }}, {{ client.state }}, {{ client.zip_code }}</td>
-                <td>{{ client.is_active }}</td>
+                <td>{{ client.name }}</td>
+                <td>{{ client.phone_number }}</td>
+                <td>{{ client.description }}</td>
+                <td>{{ client.address }} </td>
+                <td>{{ client.status }}</td>
             </tr>
             {% endfor %}
         </tbody>
     </table>
-    <h4 class="mx-2 mt-2">ISP Stats</h4>
+    <h4 class="mx-2 mt-2">Technicians Stats</h4>
     <table class="custom-table">
         <thead>
             <tr>

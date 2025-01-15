@@ -2,8 +2,8 @@
 
 {% block content %}
 <div class="container mt-3">
-    <h4 class="mx-2">Clients</h4>
-    <div class="container">
+    <h4 class="mx-2">New Provisionings</h4>
+    <!-- <div class="container">
         <form action="{% url 'search_user' %}" method="post">
             {% csrf_token %}
             <div class="input-group mb-3">
@@ -13,80 +13,52 @@
                 <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Search</button>
             </div>
         </form>
-    </div>
+    </div> -->
     <div class="row w-75">
 
             <div class="col stats">
-                <p>{{active_clients.count}} </p>
-                <h6>Active</h6>
+                <p>{{technicians.count}} </p>
+                <h6>Technicians</h6>
 
             </div>
             <div class="col stats">
-                <p> {{inactive_clients.count}} </p>
-                <h6>Inactive</h6>
-
+                <p> {{complaints.count}} </p>
+                <h6>Complaints</h6>
             </div>
             <div class="col stats">
-                <p>{{total}} </p>
-                <h6>Total</h6>
+                <p> {{connections.count}} </p>
+                <h6>Provisionings</h6>
             </div>
-
     </div>
 
     <div class="d-flex ">
-        <a href="{%  url 'create-customer' %}"><button class="btn btn-primary ">Add New Customer</button></a>
-        <a href="{%  url 'create-connection-request' %}"><button class="btn btn-dark mx-2">New Connection Provisioning</button></a>
-        <a href="{%  url 'create-customer' %}"><button class="btn btn-secondary"></button></a>
-
+        <a href="{%  url 'create-technician' %}"><button class="btn btn-primary ">Add New Technician</button></a>
     </div>
 
-    <h4 class="mx-2 mt-2">Recent Clients</h4>
+    <h4>Technicians</h4>
     <table class="custom-table">
         <thead>
             <tr>
-                <th>Client Name</th>
+                <th>Technician Name</th>
                 <th>Phone</th>
-                <th>Email</th>
-                <th>Address</th>
-                <th>Status</th>
+                <th>Complaints Assigned</th>
+                <th>Complaints Overdue</th>
+                <th>Provisionings</th>
             </tr>
         </thead>
         <tbody>
-            {% for client in recent_clients %}
+    {% for technician in technicians %}
             <tr>
-                <td>{{ client.user.username }}</td>
-                <td>{{ client.phone }}</td>
-                <td>{{ client.user.email }}</td>
-                <td>{{ client.address }} {{ client.city }}, {{ client.state }}, {{ client.zip_code }}</td>
-                <td>{{ client.is_active }}</td>
+                <td>{{ technician.user.username }}</td>
+                <td>{{ technician.phone }}</td>
+                <td>{{ technician.get_complaints.count }}</td>
+                <td>{{ technician.over_due_complaints.count }}</td>
+                <td>{{ technician.provisioned_requests.count }}</td>
             </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-    <h4 class="mx-2 mt-2">ISP Stats</h4>
-    <table class="custom-table">
-        <thead>
-            <tr>
-                <th>ISP Name</th>
-                <th>Phone</th>
-                <th>Email</th>
-                <th>Address</th>
-                <th>Complaints</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for client in clients %}
-            <tr>
-                <td>{{ client.user.username }}</td>
-                <td>{{ client.phone }}</td>
-                <td>{{ client.user.email }}</td>
-                <td>{{ client.address }} {{ client.city }}, {{ client.state }}, {{ client.zip_code }}</td>
-                <td>{{ client.complaints }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+    {% endfor %}
 
+        </tbody>
+    </table>
     <style>
         .custom-table {
             width: 100%;

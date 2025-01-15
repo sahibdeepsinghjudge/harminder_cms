@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from complaints.models import Complaint
 from django.utils.crypto import get_random_string
+from datetime import timedelta
+from django.utils import timezone
 # Create your models here.
 
 class Partner(models.Model):
@@ -22,14 +24,14 @@ class Partner(models.Model):
     
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    address = models.CharField(max_length=255)
-    city = models.CharField(max_length=255)
-    state = models.CharField(max_length=255)
-    zip_code = models.CharField(max_length=10)
-    phone = models.CharField(max_length=15)
-    addhar_number = models.TextField()
-    pan_number = models.TextField()
-    is_active = models.BooleanField(default=True)
+    address = models.CharField(max_length=255,null=True,blank=True)
+    city = models.CharField(max_length=255,null=True,blank=True)
+    state = models.CharField(max_length=255,null=True,blank=True)
+    zip_code = models.CharField(max_length=10,null=True,blank=True)
+    phone = models.CharField(max_length=15,null=True,blank=True)
+    addhar_number = models.TextField(null=True,blank=True)
+    pan_number = models.TextField(null=True,blank=True)
+    is_active = models.BooleanField(default=False)
     is_deleted = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     customer_id = models.CharField(max_length=255,default='0')
@@ -125,6 +127,11 @@ class Technician(models.Model):
     def get_complaints(self):
         return Complaint.objects.filter(assigned_to=self)
     
+    def over_due_complaints(self):
+        return Complaint.objects.filter(assigned_to=self, created_at__lt=timezone.now()-timedelta(days=2))
+    
+    def provisioned_requests(self):
+        return NewConnectionRequest.objects.filter(assigned_to=self)
 
 class Attendance(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -138,3 +145,18 @@ class Attendance(models.Model):
         return self.user.username + ' ' + str(self.date) + ' ' + str(self.time_in) + ' ' + str(self.time_out)
 
 
+class NewConnectionRequest(models.Model):
+    name = models.CharField(max_length=255)
+    phone_number = models.CharField(max_length=15)
+    address = models.TextField()
+    description = models.TextField()
+    date = models.DateTimeField(auto_now_add=True)
+    is_completed = models.BooleanField(default=False)
+    is_deleted = models.BooleanField(default=False)
+    status = models.CharField(max_length=255, default='Pending')
+    assigned_to = models.ForeignKey(Technician, on_delete=models.CASCADE, blank=True, null=True)
+    partner = models.ForeignKey(Partner, on_delete=models.CASCADE, blank=True, null=True)
+
+
+    def __str__(self):
+        return self.name + ' ' + self.phone_number + ' ' + str(self.date)

@@ -2,10 +2,11 @@ from django.shortcuts import render
 from .models import Complaint
 from users.models import Technician,Customer,Partner,StaffMember
 from django.contrib import messages
+from users.decorators import group_required
 
 # Create your views here.
 
-
+@group_required("Staff","Admin","Partner")
 def home(request):
     active_complaints = Complaint.objects.filter(is_active=True).exclude(status="Resolved",is_resolved=True)
     resolved_complaints = Complaint.objects.filter(is_active=True, status="Resolved",is_resolved=True)
@@ -30,7 +31,7 @@ def home(request):
     return render(request, "complaints/complaints_dash.html",context)
 
 
-
+@group_required("Staff","Admin","Partner")
 def create_complaint(request):
     if request.method == "POST":
         title = request.POST.get("title")

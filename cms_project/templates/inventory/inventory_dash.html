@@ -43,7 +43,7 @@
         <tbody>
             {% for device in devices %}
                 <tr>
-                    <td>{{ device.name }}</td>
+                    <td><a href="{% url 'view-update-device' device.id %}">{{ device.name }}</a></td>
                     <td>{{ device.device_type }}</td>
                     <td>{{ device.quantity }} {{ device.units }}(s)</td>
                     <td>{{ device.stock_value }}</td>

@@ -1,12 +1,15 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse
-from . models import Partner, Customer, StaffMember, Technician, AdditionalData, Payment
+from . models import Partner, Customer, StaffMember, Technician, AdditionalData, Payment, NewConnectionRequest
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
 from django.utils import timezone
 from inventory.models import DeviceDetail, AttachedDevice
 from .decorators import group_required
+from complaints.models import Complaint
+
+from django.db import transaction
 
 
 # Create your views here.
@@ -15,8 +18,8 @@ def home(request):
     return HttpResponse("Hello, World! from users app")
 
 
-
-@group_required("Staff")
+@group_required("Staff","Admin")
+@transaction.atomic
 def create_partner(request):
     if request.method == "POST":
         email = request.POST.get("email")
@@ -73,7 +76,8 @@ def login_view(request):
 
 
 
-@group_required(("Staff", "Partner"))
+@group_required(("Staff", "Partner","Admin"))
+@transaction.atomic
 def create_customer(request):
     user = request.user
     try:
@@ -107,7 +111,11 @@ def create_customer(request):
         cable_type = request.POST.get("cable_type")
         payment_recieved = request.POST.get("payment_recieved") or 0
         devices_attached = request.POST.getlist("devices_selected")
-        devices_attached = [int(i) for i in devices_attached]
+        print(devices_attached)
+        if devices_attached[0] != "":
+            devices_attached = [int(i) for i in devices_attached]
+        else:
+            devices_attached = []
 
 
         if User.objects.filter(email=email).exists():
@@ -120,7 +128,7 @@ def create_customer(request):
         user.set_password(password)
         user.save()
 
-        customer = Customer(user=user, address=address, city=city, state=state, zip_code=zip_code, phone=phone, addhar_number=addhar_number, pan_number=pan_number)
+        customer = Customer(user=user, address=address, city=city, state=state, zip_code=zip_code, phone=phone, addhar_number=addhar_number, pan_number=pan_number,partner=partner)
         customer.save()
 
         details = AdditionalData.objects.create(plan_type=plan_type, activation_date=activation_date, isp_name=isp_name, customer=customer)
@@ -147,7 +155,8 @@ def create_customer(request):
     return render(request, "users/create_customer.html", {"cables":cables,"devices":deivces})
 
 
-
+@group_required(("Staff", "Partner","Admin","Technician"))
+@transaction.atomic
 def clients(request):
     active_clients = Customer.objects.filter(is_active=True)
     inactive_clients = Customer.objects.filter(is_active=False)
@@ -179,3 +188,121 @@ def search_user(request):
             messages.error(request, "User Not Found")
         return render(request, "users/clients.html", {"users":customer})
     return render(request, "users/clients.html")
+
+
+@transaction.atomic
+def new_connection_request(request):
+    user = request.user
+    try:
+        staff = StaffMember.objects.get(user=user)
+        partner = staff.partner
+    except:
+        pass
+
+    try:
+        partner = Partner.objects.get(user=user)
+    except:
+        pass
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        phone_number = request.POST.get("phone_number")
+        address = request.POST.get("address")
+        description = request.POST.get("description")
+        assigned_to = request.POST.get("assigned_to")
+
+        technician = Technician.objects.get(id=assigned_to)
+        if NewConnectionRequest.objects.filter(phone_number=phone_number).exclude(is_completed=True).exists():
+            messages.error(request, "Request Already Exists")
+            return redirect("new_connection_request")
+        new_connection = NewConnectionRequest.objects.create(name=name, phone_number=phone_number, address=address, description=description, partner=partner, assigned_to=technician)
+
+        messages.success(request, "Request Created Successfully")
+        return redirect("dashboard")
+    
+    technicians = Technician.objects.filter(partner=partner)
+    return render(request, "users/new_connection_request.html", {"technicians":technicians})
+    
+
+@group_required(("Staff", "Partner","Admin","Technician"))
+def new_conn_dash(request):
+    pending_conn = NewConnectionRequest.objects.filter(status="Pending")
+    conersions = NewConnectionRequest.objects.filter(is_completed=True)
+    recent_clients = NewConnectionRequest.objects.all().order_by("-id")[:5]
+    context={
+        "pending_conn":pending_conn,
+        "conersions":conersions,
+        "recent_clients":recent_clients
+    }
+    return render(request, "users/new_connections_dash.html", context)
+
+
+@group_required(("Staff", "Partner","Admin","Technician"))
+def technicians_dash(request):
+    user = request.user
+    try:
+        staff = StaffMember.objects.get(user=user)
+        partner = staff.partner
+    except:
+        pass
+
+    try:
+        partner = Partner.objects.get(user=user)
+    except:
+        pass
+    technicians = Technician.objects.filter(partner=partner)
+    complaints = Complaint.objects.filter(assigned_to__in=technicians)
+    connections = NewConnectionRequest.objects.filter(assigned_to__in=technicians)
+    context={
+        "technicians":technicians,
+        "complaints":complaints,
+        "connections":connections
+    }
+    return render(request, "users/technicians_dash.html", context)
+
+
+@group_required(("Staff", "Partner","Admin"))
+@transaction.atomic
+def create_technician(request):
+    user = request.user
+    try:
+        staff = StaffMember.objects.get(user=user)
+        partner = staff.partner
+    except:
+        pass
+
+    try:
+        partner = Partner.objects.get(user=user)
+    except:
+        pass
+    if request.method == "POST":
+        email = request.POST.get("email")
+        name = request.POST.get("name")
+        phone = request.POST.get("phone_number")
+        address = request.POST.get("address")
+        city = request.POST.get("city")
+        state = request.POST.get("state")
+        zip_code = request.POST.get("zip_code")
+        addhar_number = request.POST.get("addhar_number")
+        pan_number = request.POST.get("pan_number")
+
+        if User.objects.filter(email=email).exists():
+            messages.error(request, "Email Already Exists")
+            return redirect("create-technician")
+        
+        if Technician.objects.filter(phone=phone,pan_number=pan_number,addhar_number=addhar_number).exists():
+            messages.error(request, "Detalis Already Exists")
+            return redirect("create-technician")
+        
+        user = User.objects.create_user(email=email, username=name.replace(" ", "_"))
+        password = name[:4] + "@" + phone[-4:]
+        print(password)
+        user.set_password(password)
+        user.save()
+
+        technician = Technician(user=user, address=address, city=city, state=state, zip_code=zip_code, phone=phone, addhar_number=addhar_number, pan_number=pan_number,partner=partner)
+        technician.save()
+        messages.success(request, "Technician Created Successfully")
+        return redirect("dashboard")
+    
+    return render(request, "users/create_technician.html")

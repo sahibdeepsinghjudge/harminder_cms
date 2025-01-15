@@ -2,41 +2,42 @@
 
 {% block content %}
     <div class="container mt-2">
-        <h4 class="mx-3" style="color:#3F72AF;">New Device</h4>
+        <h4 class="mx-3" style="color:#3F72AF;">Device Details</h4>
         <hr class="mx-3">
         <div class="container px-3">
             <div class="row">
                 <div class="col-md-6">
-                    <form action="{% url 'create-device' %}" method="post" enctype="multipart/form-data">
+                    <form action="{% url 'view-update-device' device.id %}" method="post" enctype="multipart/form-data">
                         {% csrf_token %}
                         <div class="form-group">
                             <label for="name">Device Name</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
+                            <input type="text" class="form-control" id="name" name="name" value="{{device.name}}" required>
                         </div>
                         <div class="form-group">
                             <label for="serial_number">Serial Number</label>
-                            <input type="text" class="form-control" id="serial_number" name="serial_number" required>
+                            <input type="text" class="form-control" id="serial_number" name="serial_number" value="{{device.serial_number}}">
                         </div>
                         <div class="form-group">
                             <label for="mac_address">MAC Address</label>
-                            <input type="text" class="form-control" id="mac_address" name="mac_address" >
+                            <input type="text" class="form-control" id="mac_address" name="mac_address"  value="{{device.mac_address}}">
                         </div>
                         <div class="form-group">
                             <label for="quantity">Quantity</label>
-                            <input type="number" class="form-control" id="quantity" name="quantity" >
+                            <input type="number" class="form-control" id="quantity" name="quantity" value="{{device.quantity}}"> 
                         </div>
                         <div class="form-group">
                             <label for="units">Units</label>
-                            <input type="text" class="form-control" id="units" name="units" required>
+                            <input type="text" class="form-control" id="units" name="units" required value="{{device.units}}">
                         </div>
                         <div class="form-group">
                             <label for="price_per_unit">Price Per Unit</label>
-                            <input type="number" class="form-control" id="price_per_unit" name="price_per_unit" required>
+                            <input type="number" class="form-control" id="price_per_unit" name="price_per_unit" required value="{{device.price_per_unit}}">
                         </div>
                         <div class="form-group">
                             <label for="device_type">Device Type</label>
 
-                        <select class="form-select" id="device_type" name="device_type" required>
+                        <select class="form-select" id="device_type" name="device_type">
+                            <option value="{{device.device_type}}">{{device.device_type}}</option>
                             <option value="Cable">Cable</option>
                             <option value="ONT Single">ONT Single</option>
                             <option value="ONT Dual">ONT Dual</option>
@@ -48,15 +49,21 @@
                         </div>
                         <div class="form-group">
                             <label for="in_stock">In Stock</label>
-                            <input type="checkbox" id="in_stock" name="in_stock">
+                            {% if not device.in_stock %}
+                                <input type="checkbox" id="in_stock" name="in_stock">
+                            {% else %}
+                                <input type="checkbox" id="in_stock" name="in_stock" checked>
+                            {% endif %}
                         </div>
                         <div class="form-group">
                             <label for="hsn_code">HSN Code</label>
-                            <input type="text" class="form-control" id="hsn_code" name="hsn_code" required>
+                            <input type="text" class="form-control" id="hsn_code" name="hsn_code" value="{{device.hsn_code}}" required>
                         </div>
                         <div class="form-group">
                             <label for="description">Description</label>
-                            <textarea class="form-control" id="description" name="description" required></textarea>
+                            <textarea class="form-control" id="description" name="description" required>
+                                {{device.description}}
+                            </textarea>
                         </div>
                         <div class="form-group mt-2">
                             <button type="submit" class="dark-button">Create Device</button>

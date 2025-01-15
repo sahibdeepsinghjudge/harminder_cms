@@ -20,11 +20,12 @@
         <a href="{% url 'complaints_dash' %}"><li> <div class="icon"><i class="fa-solid fa-comment"></i></div> Complaints</li></a>
         <a href="{% url 'clients' %}"><li><div class="icon"><i class="fa-solid fa-users-gear"></i></div>Clients</li></a>
         <a href="{% url 'inventory_dash' %}"><li><div class="icon"><i class="fa-solid fa-warehouse"></i></div>Inventory</li></a>
-
-        {% if  request.user.groups.all.0 == "Admin"  %}
+        <a href="{% url 'new-conn-dash' %}"><li><div class="icon"><i class="fa-solid fa-user-plus"></i></div>New Connections</li></a>
+        {% if  request.user.groups.all.0 == "Staff"  %}
+        {% else %}
             <a href=""><li><div class="icon"><i class="fa-solid fa-handshake"></i></div>Partners</li></a>
         {% endif %}
-            <a href=""><li><div class="icon"><i class="fa-solid fa-chalkboard-user"></i></div>Technicians</li></a>
+            <a href="{% url 'tech-dash' %}"><li><div class="icon"><i class="fa-solid fa-chalkboard-user"></i></div>Technicians</li></a>
         {% if  request.user.groups.all.0 == "Staff"  %}
         {% else %}
             <a href=""><li><div class="icon"><i class="fa-solid fa-user-check"></i></div>Staff Members</li></a>
