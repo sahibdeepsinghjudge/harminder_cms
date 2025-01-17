@@ -265,16 +265,19 @@ def technicians_dash(request):
 @transaction.atomic
 def create_technician(request):
     user = request.user
-    try:
-        staff = StaffMember.objects.get(user=user)
-        partner = staff.partner
-    except:
-        pass
+    if user.is_superuser:
+        partner = None
+        try:
+            staff = StaffMember.objects.get(user=user)
+            partner = staff.partner
+        except:
+            pass
 
-    try:
-        partner = Partner.objects.get(user=user)
-    except:
-        pass
+        try:
+            partner = Partner.objects.get(user=user)
+        except:
+            pass
+
     if request.method == "POST":
         email = request.POST.get("email")
         name = request.POST.get("name")

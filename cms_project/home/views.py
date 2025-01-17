@@ -5,7 +5,7 @@ from users.decorators import group_required
 
 # Create your views here.
 
-@group_required("Staff","Admin","Partner")
+@group_required("Staff","Admin","Partner","Technician",login_url="login")
 def home(request):
     user = request.user
     if user.is_authenticated == False:
