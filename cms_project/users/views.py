@@ -3,7 +3,7 @@ from django.http import HttpResponse
 from . models import Partner, Customer, StaffMember, Technician, AdditionalData, Payment, NewConnectionRequest
 from django.contrib.auth.models import User
 from django.contrib import messages
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.utils import timezone
 from inventory.models import DeviceDetail, AttachedDevice
 from .decorators import group_required
@@ -309,3 +309,8 @@ def create_technician(request):
         return redirect("dashboard")
     
     return render(request, "users/create_technician.html")
+
+
+def logout_view(request):
+    logout(request)
+    return redirect("login")

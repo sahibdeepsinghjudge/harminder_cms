@@ -30,5 +30,7 @@
         {% else %}
             <a href=""><li><div class="icon"><i class="fa-solid fa-user-check"></i></div>Staff Members</li></a>
         {% endif %}
+        <a href="{% url 'logout' %}"><li class="bg-white text-danger"><div class="icon"><i class="fa-solid fa-power-off"></i></div>Logout</li></a>
+
     </ul>
 </div>

@@ -3,9 +3,14 @@ from django.http import HttpResponse
 from users.models import Partner, Customer, StaffMember, Technician
 from users.decorators import group_required
 
+from django.contrib.auth.decorators import login_required
+
+
 # Create your views here.
 
-@group_required("Staff","Admin","Partner","Technician",login_url="login")
+
+@login_required
+@group_required(("Staff","Admin","Partner","Technician"))
 def home(request):
     user = request.user
     if user.is_authenticated == False:
