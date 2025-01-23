@@ -11,14 +11,17 @@
 
             </div>
             <div class="col stats">
-                <p>{{ complaints.count }} 9 </p>
+                <p>{{ complaints.count }} </p>
                 <h6>Complaints</h6>
 
             </div>
+            {% if  not request.user.is_superuser  %}
+            {% else %}
             <div class="col stats">
                 <p>{{ partners.count }} </p>
                 <h6>Partners</h6>
             </div>
+            {% endif %}
 
     </div>
     <h4 class="mx-2 mt-2">Recent Clients</h4>

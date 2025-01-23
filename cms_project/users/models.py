@@ -145,6 +145,8 @@ class Attendance(models.Model):
         return self.user.username + ' ' + str(self.date) + ' ' + str(self.time_in) + ' ' + str(self.time_out)
 
 
+request_type = (("New Internet Connection","New Internet Connection"),("Camera Connection","Camera Connection"),("Other","Other"))
+
 class NewConnectionRequest(models.Model):
     name = models.CharField(max_length=255)
     phone_number = models.CharField(max_length=15)
@@ -156,7 +158,7 @@ class NewConnectionRequest(models.Model):
     status = models.CharField(max_length=255, default='Pending')
     assigned_to = models.ForeignKey(Technician, on_delete=models.CASCADE, blank=True, null=True)
     partner = models.ForeignKey(Partner, on_delete=models.CASCADE, blank=True, null=True)
-
+    request_type = models.CharField(max_length=255, default='New Internet Connection', choices=request_type)
 
     def __str__(self):
         return self.name + ' ' + self.phone_number + ' ' + str(self.date)

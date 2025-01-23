@@ -17,7 +17,7 @@
                     </div>
                     <div class="form-group">
                         <label for="phone_number">Phone Number</label>
-                        <input type="text" class="form-control" id="phone_number" name="phone_number" required>
+                        <input type="text" class="form-control" id="phone_number" value="{{phone_number}}" name="phone_number" required>
                     </div>
                     <div class="form-group">
                         <label for="address">Address</label>
@@ -37,6 +37,14 @@
                             {% for technician in technicians %}
                                 <option value="{{technician.id}}">{{technician.user.username}}</option>
                             {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="request_type">Connection Type</label>
+                        <select class="form-select" id="request_type" name="request_type">
+                           
+                                <option value="New Internet Connection">New Internet Connection</option>
+                                <option value="Camera Connection">Camera Connection</option>
                         </select>
                     </div>
                 <button type="submit" class="dark-button mt-3">Create Request</button>

@@ -1,0 +1,108 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+    <div class="container mt-2">
+        <h4 class="mx-3" style="color:#3F72AF;">Customer Details</h4>
+        <hr class="mx-3">
+        <div class="container px-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="container">
+                        <h4>Client Details</h4>
+                        <table class="table">
+                            <tr>
+                                <td>Name</td>
+                                <td>{{client.user.username}}
+                                    <small>{{client.customer_id}}</small>
+                                </td> 
+                            </tr>
+                            <tr>
+                                <td>Phone</td>
+                                <td>{{client.phone}}</td>
+                            </tr>
+                            <tr>
+                                <td>Email</td>
+                                <td>{{client.user.email}}</td>
+                            </tr>
+                            <tr>
+                                <td>Addhar</td>
+                                <td>{{client.addhar_number}}</td>
+                            </tr>
+                            <tr>
+                                <td>Pan Number</td>
+                                <td>{{client.pan_number}}</td>
+                            </tr>
+                            <tr>
+                                <td>Date Joined</td>
+                                <td>{{client.date_joined}}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="container">
+                        <h4>Payment Details</h4>
+                        <table class="table">
+                            <tr>
+                                <td>Balance</td>
+                                <td>{{client.payments.balance}}
+                                </td> 
+                            </tr>
+                            <tr>
+                                <td>Installation Amount</td>
+                                <td>{{client.payments.install_amount}}</td>
+                            </tr>
+                            <tr>
+                                <td>Bill Amount</td>
+                                <td>{{client.payments.bill_amount}}</td>
+                            </tr>
+                            <tr>
+                                <td>Cable Amount</td>
+                                <td>{{client.payments.cable_amount}}</td>
+                            </tr>
+                            <tr>
+                                <td>Payment Recieved</td>
+                                <td>{{client.payments.payment_recieved}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="container">
+                        <h4>Devices Configured</h4>
+                        <table class="table">
+                        {% for device in client.devices.all %}
+                            <tr>
+                                <td>{{device.device.name}}</td>
+                                <td>
+                                    <details>
+                                    <table>
+                                        <tr>
+                                            <td>Serial Number</td>
+                                            <td>{{device.serial_number}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Mac Address</td>
+                                            <td>{{device.mac_address}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Date Added</td>
+                                            <td>{{device.date_attached}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Added By</td>
+                                            <td>{{device.added_by}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Price Per Unit</td>
+                                            <td>Rs. {{device.device.price_per_unit}}</td>
+                                        </tr>
+                                    </table>
+                                </details>
+                                </td> 
+                            </tr>
+                            {% endfor %}
+                        </table>
+                    </div>
+                </div>
+            </div>  
+    </div>
+{% endblock content %}
+

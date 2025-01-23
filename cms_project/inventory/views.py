@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import DeviceDetail
+from .models import DeviceDetail, ProviderCompanies
 from django.contrib import messages
 from users.models import Partner, StaffMember
 from django.contrib.auth.decorators import login_required
@@ -8,8 +8,8 @@ from django.db import models
 from users.decorators import group_required
 # Create your views here.
 
-@group_required("Staff","Admin","Partner")
 @login_required
+@group_required(("Staff","Admin","Partner"))
 def home(request):
     user = request.user
     try:
@@ -41,7 +41,7 @@ def home(request):
 
 
 
-@group_required("Staff","Admin","Partner")
+@group_required(("Staff","Admin","Partner"))
 def create_device(req):
     user = req.user
 
@@ -86,8 +86,10 @@ def create_device(req):
         messages.success(req,"Device Created Successfully")
 
     device_groups = DeviceDetail.objects.filter(added_by=partner.user).values('device_type').annotate(total_quantity=models.Sum('quantity'))
+    providers = ProviderCompanies.objects.all()
     context = {
-        "device_groups": device_groups
+        "device_groups": device_groups,
+        "providers": providers
     }
     return render(req, "inventory/create_device.html",context= context)
 

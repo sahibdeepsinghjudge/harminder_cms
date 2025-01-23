@@ -12,6 +12,30 @@ from complaints.models import Complaint
 from django.db import transaction
 
 
+
+
+
+def return_user_partner(request):
+        user = request.user
+        
+        try:
+            staff = StaffMember.objects.get(user=user)
+            partner = staff.partner
+            # if user is staff
+        except:
+            pass
+
+        try:
+            # if user is partner and admin is partner also
+            partner = Partner.objects.get(user=user)
+        except:
+            pass
+        
+        if partner:
+            return partner
+        return None
+
+
 # Create your views here.
 
 def home(request):
@@ -79,17 +103,7 @@ def login_view(request):
 @group_required(("Staff", "Partner","Admin"))
 @transaction.atomic
 def create_customer(request):
-    user = request.user
-    try:
-        staff = StaffMember.objects.get(user=user)
-        partner = staff.partner
-    except:
-        pass
-
-    try:
-        partner = Partner.objects.get(user=user)
-    except:
-        pass
+    partner = return_user_partner(request)
     if request.method == "POST":
         name = request.POST.get("name")
         email = request.POST.get("email")
@@ -111,7 +125,7 @@ def create_customer(request):
         cable_type = request.POST.get("cable_type")
         payment_recieved = request.POST.get("payment_recieved") or 0
         devices_attached = request.POST.getlist("devices_selected")
-        print(devices_attached)
+        # print(devices_attached)
         if devices_attached[0] != "":
             devices_attached = [int(i) for i in devices_attached]
         else:
@@ -158,10 +172,11 @@ def create_customer(request):
 @group_required(("Staff", "Partner","Admin","Technician"))
 @transaction.atomic
 def clients(request):
-    active_clients = Customer.objects.filter(is_active=True)
-    inactive_clients = Customer.objects.filter(is_active=False)
+    partner = return_user_partner(request)
+    active_clients = Customer.objects.filter(is_active=True,partner=partner)
+    inactive_clients = Customer.objects.filter(is_active=False,partner=partner)
     total = active_clients.count() + inactive_clients.count()
-    recent_clients = Customer.objects.filter(is_active=True).order_by("-id")[:5]
+    recent_clients = Customer.objects.filter(is_active=True,partner=partner).order_by("-id")[:5]
     context={
         "active_clients":active_clients,
         "inactive_clients":inactive_clients,
@@ -174,35 +189,31 @@ def clients(request):
 def search_user(request):
     if request.method == "POST":
         number = request.POST.get("number")
-        start_complaint = request.POST.get("start_complaint")
-        user_search = request.POST.get("user_search")
-        customer = Customer.objects.filter(phone=number)
-        customer = customer[0] if customer else None
+        start_complaint = request.POST.get("start_complaint") == "True"
+        user_search = request.POST.get("user_search") == "True"
+
+        customer = Customer.objects.filter(phone=number).first()
+        
         if customer:
-            if start_complaint == "True":
-                technicians = Technician.objects.filter(user__is_active=True,partner = customer.partner.id)
-                return render(request, "complaints/create_complaint.html", {"client":customer,"technicians":technicians})
-            elif user_search == "True":
-                return render(request, "users/customer_details.html", {"users":customer})
+            if start_complaint:
+                technicians = Technician.objects.filter(user__is_active=True, partner=customer.partner.id)
+                return render(request, "complaints/create_complaint.html", {"client": customer, "technicians": technicians})
+            elif user_search:
+                return render(request, "users/customer_details.html", {"users": customer})
         else:
-            messages.error(request, "User Not Found")
-        return render(request, "users/clients.html", {"users":customer})
+            messages.error(request, "User Not Found. Please create the user first before starting a complaint.")
+            return redirect(f"/accounts/provisioning/request/?phone_number={number}&next=True")
+        
     return render(request, "users/clients.html")
 
 
 @transaction.atomic
 def new_connection_request(request):
-    user = request.user
-    try:
-        staff = StaffMember.objects.get(user=user)
-        partner = staff.partner
-    except:
-        pass
+    redirect_url = request.GET.get("next")
+    phone_number = request.GET.get("phone_number")
 
-    try:
-        partner = Partner.objects.get(user=user)
-    except:
-        pass
+
+    partner = return_user_partner(request)
 
     if request.method == "POST":
         name = request.POST.get("name")
@@ -210,25 +221,28 @@ def new_connection_request(request):
         address = request.POST.get("address")
         description = request.POST.get("description")
         assigned_to = request.POST.get("assigned_to")
+        request_type = request.POST.get("request_type")
 
         technician = Technician.objects.get(id=assigned_to)
-        if NewConnectionRequest.objects.filter(phone_number=phone_number).exclude(is_completed=True).exists():
+        if NewConnectionRequest.objects.filter(phone_number=phone_number,request_type=request_type).exclude(is_completed=True).exists():
             messages.error(request, "Request Already Exists")
             return redirect("new_connection_request")
-        new_connection = NewConnectionRequest.objects.create(name=name, phone_number=phone_number, address=address, description=description, partner=partner, assigned_to=technician)
+        new_connection = NewConnectionRequest.objects.create(name=name, phone_number=phone_number, address=address, description=description, partner=partner, assigned_to=technician, request_type=request_type)
 
         messages.success(request, "Request Created Successfully")
         return redirect("dashboard")
     
     technicians = Technician.objects.filter(partner=partner)
-    return render(request, "users/new_connection_request.html", {"technicians":technicians})
+    return render(request, "users/new_connection_request.html", {"technicians":technicians, "phone_number":phone_number, "redirect_url":redirect_url})
     
 
 @group_required(("Staff", "Partner","Admin","Technician"))
 def new_conn_dash(request):
-    pending_conn = NewConnectionRequest.objects.filter(status="Pending")
-    conersions = NewConnectionRequest.objects.filter(is_completed=True)
-    recent_clients = NewConnectionRequest.objects.all().order_by("-id")[:5]
+    partner = return_user_partner(request)
+
+    pending_conn = NewConnectionRequest.objects.filter(partner=partner,status="Pending")
+    conersions = NewConnectionRequest.objects.filter(partner=partner,is_completed=True)
+    recent_clients = NewConnectionRequest.objects.filter(partner=partner).order_by("-id")[:5]
     context={
         "pending_conn":pending_conn,
         "conersions":conersions,
@@ -239,20 +253,10 @@ def new_conn_dash(request):
 
 @group_required(("Staff", "Partner","Admin","Technician"))
 def technicians_dash(request):
-    user = request.user
-    try:
-        staff = StaffMember.objects.get(user=user)
-        partner = staff.partner
-    except:
-        pass
-
-    try:
-        partner = Partner.objects.get(user=user)
-    except:
-        pass
+    partner = return_user_partner(request)
     technicians = Technician.objects.filter(partner=partner)
-    complaints = Complaint.objects.filter(assigned_to__in=technicians)
-    connections = NewConnectionRequest.objects.filter(assigned_to__in=technicians)
+    complaints = Complaint.objects.filter(assigned_to__in=technicians,partner=partner)
+    connections = NewConnectionRequest.objects.filter(assigned_to__in=technicians,partner=partner)
     context={
         "technicians":technicians,
         "complaints":complaints,
@@ -314,3 +318,8 @@ def create_technician(request):
 def logout_view(request):
     logout(request)
     return redirect("login")
+
+
+def client_details(request,pk):
+    client = Customer.objects.get(id=pk)
+    return render(request,"users/client_details.html",{"client":client})

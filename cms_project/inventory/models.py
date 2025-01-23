@@ -20,6 +20,7 @@ class DeviceDetail(models.Model):
     hsn_code = models.CharField(max_length=255,blank=True,null=True)
     image = models.ImageField(upload_to='device_images',blank=True,null=True)
     description = models.TextField(blank=True,null=True)
+    provider_type = models.CharField(max_length=255,choices=(('ISP','ISP'),('Camera Connection','Camera Connection')))
 
     def __str__(self):
         return self.name
@@ -41,4 +42,16 @@ class AttachedDevice(models.Model):
 
     def stock_value(self):
         return self.device.price_per_unit * self.quantity
+    
+
+
+    
+class ProviderCompanies(models.Model):
+    name = models.CharField(max_length=255)
+    short_name = models.CharField(max_length=255)
+    provider_type = models.CharField(max_length=255,choices=(('ISP','ISP'),('Camera Connection','Camera Connection')))
+
+    def __str__(self):
+        return self.name
+    
     

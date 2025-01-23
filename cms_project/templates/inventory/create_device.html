@@ -47,6 +47,15 @@
                         </select>
                         </div>
                         <div class="form-group">
+                            <label for="provider_type">Provider</label>
+                        <select class="form-select" id="provider_type" name="provider_type" required>
+                            {% for provider in providers %}
+                                 <option value="Cable">{{provider.short_name}}--{{provider.provider_type}}</option>
+                            {% endfor %}
+                            
+                        </select>
+                        </div>
+                        <div class="form-group">
                             <label for="in_stock">In Stock</label>
                             <input type="checkbox" id="in_stock" name="in_stock">
                         </div>

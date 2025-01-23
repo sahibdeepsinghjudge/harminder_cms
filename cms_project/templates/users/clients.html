@@ -36,7 +36,7 @@
     <div class="d-flex ">
         <a href="{%  url 'create-customer' %}"><button class="btn btn-primary ">Add New Customer</button></a>
         <a href="{%  url 'create-connection-request' %}"><button class="btn btn-dark mx-2">New Connection Provisioning</button></a>
-        <a href="{%  url 'create-customer' %}"><button class="btn btn-secondary"></button></a>
+        <!-- <a href="{%  url 'create-customer' %}"><button class="btn btn-secondary"></button></a> -->
 
     </div>
 
@@ -53,13 +53,17 @@
         </thead>
         <tbody>
             {% for client in recent_clients %}
-            <tr>
-                <td>{{ client.user.username }}</td>
-                <td>{{ client.phone }}</td>
-                <td>{{ client.user.email }}</td>
-                <td>{{ client.address }} {{ client.city }}, {{ client.state }}, {{ client.zip_code }}</td>
-                <td>{{ client.is_active }}</td>
-            </tr>
+                    <tr>
+                            <td>
+                        <a href="{% url 'client-details' client.id %}">
+                                {{ client.user.username }}
+                        </a>
+                            </td>
+                        <td>{{ client.phone }}</td>
+                        <td>{{ client.user.email }}</td>
+                        <td>{{ client.address }} {{ client.city }}, {{ client.state }}, {{ client.zip_code }}</td>
+                        <td>{{ client.is_active }}</td>
+                    </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -86,43 +90,6 @@
             {% endfor %}
         </tbody>
     </table>
-
-    <style>
-        .custom-table {
-            width: 100%;
-            margin-bottom: 1rem;
-            color: #212529;
-            border-collapse: collapse;
-        }
-
-        .custom-table th,
-        .custom-table td {
-            padding: 0.75rem;
-            vertical-align: top;
-            border-top: 1px solid #dee2e6;
-        }
-
-        .custom-table thead  {
-            vertical-align: bottom;
-            border-bottom: 2px solid #dee2e6;
-            background-color: #DBE2EF !important;
-            color: #3F72AF !important;
-            border-radius: 0.25rem;
-        }
-
-        .custom-table tbody + tbody {
-            border-top: 2px solid #dee2e6;
-        }
-
-        .custom-table tbody tr:nth-of-type(odd) {
-            background-color: rgba(0, 0, 0, 0.05);
-        }
-
-        .custom-table tbody tr:hover {
-            background-color: rgba(0, 0, 0, 0.075);
-        }
-    </style>
-
 </div>
 
 {% endblock %}
