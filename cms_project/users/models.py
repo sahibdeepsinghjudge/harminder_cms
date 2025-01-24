@@ -21,6 +21,8 @@ class Partner(models.Model):
         return self.user.username
     
 
+connection_choices = (("Internet","Internet"),("Camera","Camera"),("Camera+Internet","Camera+Internet"))
+
     
 class Customer(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -38,8 +40,8 @@ class Customer(models.Model):
     date_joined = models.DateTimeField(auto_now_add=False, blank=True, null=True)
     date_created = models.DateTimeField(auto_now_add=True)    
     partner = models.ForeignKey(Partner, on_delete=models.CASCADE, blank=True, null=True)
-    devices = models.ManyToManyField('inventory.AttachedDevice', blank=True,null=True)
-
+    devices = models.ManyToManyField('inventory.AttachedDevice', blank=True)
+    connection_type = models.CharField(max_length=255, blank=True, null=True,choices=connection_choices)
 
     def __str__(self):
         return self.user.username
@@ -51,6 +53,10 @@ class Customer(models.Model):
 
         super(Customer, self).save(*args, **kwargs)
     
+    def get_additional_data(self):
+        if AdditionalData.objects.filter(customer=self).exists():
+            return AdditionalData.objects.get(customer=self)
+        return None
 
     def payments(self):
         if Payment.objects.filter(customer=self).exists():

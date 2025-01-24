@@ -47,11 +47,11 @@
                         </select>
                         </div>
                         <div class="form-group">
-                            <label for="provider_type">Provider</label>
+                            <label for="provider_type">Service Type</label>
                         <select class="form-select" id="provider_type" name="provider_type" required>
-                            {% for provider in providers %}
-                                 <option value="Cable">{{provider.short_name}}--{{provider.provider_type}}</option>
-                            {% endfor %}
+
+                                 <option value="ISP">ISP</option>
+                                 <option value="Camera Connection">Camera Connection</option>
                             
                         </select>
                         </div>

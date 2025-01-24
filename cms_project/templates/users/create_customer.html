@@ -66,12 +66,20 @@
             <div class="col-md-6">
                 <h5 >Connection Information</h5>
                     <div class="form-group">
+                        <label for="name">Connection type</label>
+                        <select class="form-select" id="connection_type" name="connection_type" >
+                            <option value="Internet">Internet</option>
+                            <option value="Camera">Camera</option>
+                            <option value="Internet+Camera">Internet+Camera</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
                         <label for="name">Plan Type</label>
                         <input type="text" class="form-control" id="plan-type" name="plan_type" >
                     </div>
                     <div class="form-group">
                         <label for="name">ISP Name</label>
-                        <input type="text" class="form-control" id="isp" name="isp" >
+                        <input type="text" class="form-control" id="isp" name="isp_name" >
                     </div>
                     <div class="form-group">
                         <label for="name">Install Amount</label>
@@ -85,7 +93,24 @@
                         <label for="name">Payment Recieved</label>
                         <input type="text" class="form-control" id="payment_recieved" name="payment_recieved" >
                     </div>
-                    <div class="form-group">
+                    
+                    <button type="submit" class="dark-button mt-3">Create Customer Account</button>
+                    <p class="text-secondary">
+                        You need to configure devices for this customer account after creating it.
+                    </p>
+                </form>
+
+            </div>
+        </div>
+        <hr class="hr">
+        <h4>Next Step Manage Devices</h4>
+
+    </div>
+</div>
+
+
+<!-- 
+    <div class="form-group">
                         <label for="name">Cable Type</label>
                         <select class="form-select" id="cable_type" name="cable_type" >
                             {% for cable in cables %}
@@ -105,19 +130,23 @@
                             {% endfor %}
                         </select>
 
+                        <div class="form-group">
+                            <label for="ip_address">IP Address</label>
+                            <input type="text" class="form-control" id="ip_address" name="ip_address" >
+                        </div>
+                        <div class="form-group">
+                            <label for="mac_address">Mac Address</label>
+                            <input type="text" class="form-control" id="mac_address" name="mac_address" >
+                        </div>
+
                         <p class="mt-1">Selected Devices</p>
                         <ul class="list-group" id="selected-devices">
                         </ul>
                         <button class="btn btn-secondary" type="button">Add More</button>
                     </div>
-                    <input type="hidden" name="devices_selected">
-                <button type="submit" class="dark-button mt-3">Create Customer</button>
-            </form>
+                    <input type="text" name="devices_selected">
 
-            </div>
-        </div>
-    </div>
-</div>
+-->
 
 
 <script>
@@ -125,11 +154,29 @@
     let devicesSelected = document.querySelector('input[name="devices_selected"]');
     let deviceSelect = document.querySelector('select[name="devices"]');
     let selectedDevicesList = document.querySelector('#selected-devices');
+    let mac_address = document.querySelector('input[name="mac_address"]');
+    let ip_address = document.querySelector('input[name="ip_address"]');
     let addMoreButton = document.querySelector('button');
+
+
+    class Device{
+        constructor(id, mac_address, ip_address){
+            this.id = id;
+            this.mac = mac_address;
+            this.ip = ip_address;
+        }
+
+        toString(){
+            return `${this.id}-${this.mac}-${this.ip}`;
+        }
+    }
 
     addMoreButton.addEventListener('click', () => {
         let device = deviceSelect.options[deviceSelect.selectedIndex];
-        selectedDevices.push(device.value);
+        let mac = mac_address.value;
+        let ip = ip_address.value;
+        let newDevice = new Device(device.value, mac, ip);
+        selectedDevices.push(newDevice);
         let li = document.createElement('li');
         li.classList.add('list-group-item');
         li.classList.add('device-li');

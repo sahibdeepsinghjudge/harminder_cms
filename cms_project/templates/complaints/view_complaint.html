@@ -1,0 +1,117 @@
+{% extends 'home/base.html' %}
+
+{% block content %}
+    <div class="container mt-2">
+        <h4 class="mx-3" style="color:#3F72AF;">New Complaint</h4>
+        <hr class="mx-3">
+        <div class="container px-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <form action="{% url 'create-complaint' %}" method ="post">
+                        {% csrf_token %}    
+                        <div class="form-group">
+                            <label for="title">Complaint Title</label>
+                            <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Complaint Description</label>
+                            <textarea class="form-control" id="description" name="description" required></textarea>
+                        </div>  
+                        <div class="form-group">
+                            <label for="priority">Complaint Priority</label>
+                            <select class="form-select" id="priority" name="priority">
+                                <option value="0">Low</option>
+                                <option value="1">Medium</option>
+                                <option value="2">High</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Technician Log</label>
+                            <textarea class="form-control" id="description" name="description" required>
+                                {{complaint.resolved_description}}
+                            </textarea>
+                        </div> 
+                        <div class="form-group">
+                            <label for="priority">Assigned To</label>
+                            <select class="form-select" id="assgined_to" name="assigned_to">
+                                {% if not technicians %}
+                                    <option value="0">No Technicians Available</option>
+                                {% endif %}
+                                {% for technician in technicians %}
+                                    <option value="{{technician.id}}">{{technician.user.username}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <input type="hidden" name="client_id" value="{{client.id}}">
+                        <div class="form-group mt-2">
+                            <button type="submit" class="dark-button">Create Complaint</button>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <div class="container">
+                        <h4>Client Details</h4>
+                        <table class="table">
+                            <tr>
+                                <td>Name</td>
+                                <td>{{client.user.username}}
+                                    <small>{{client.customer_id}}</small>
+                                </td> 
+                            </tr>
+                            <tr>
+                                <td>Phone</td>
+                                <td>{{client.phone}}</td>
+                            </tr>
+                            <tr>
+                                <td>Email</td>
+                                <td>{{client.user.email}}</td>
+                            </tr>
+                            <tr>
+                                <td>Addhar</td>
+                                <td>{{client.addhar_number}}</td>
+                            </tr>
+                            <tr>
+                                <td>Pan Number</td>
+                                <td>{{client.pan_number}}</td>
+                            </tr>
+                            <tr>
+                                <td>Date Joined</td>
+                                <td>{{client.date_joined}}</td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="container">
+                        <h4>Payment Details</h4>
+                        <table class="table">
+                            <tr>
+                                <td>Balance</td>
+                                <td>{{client.payments.balance}}
+                                </td> 
+                            </tr>
+                            <tr>
+                                <td>Installation Amount</td>
+                                <td>{{client.payments.install_amount}}</td>
+                            </tr>
+                            <tr>
+                                <td>Bill Amount</td>
+                                <td>{{client.payments.bill_amount}}</td>
+                            </tr>
+                            <tr>
+                                <td>Cable Amount</td>
+                                <td>{{client.payments.cable_amount}}</td>
+                            </tr>
+                            <tr>
+                                <td>Payment Recieved</td>
+                                <td>{{client.payments.payment_recieved}}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="container">
+                        <h4>Devices Configured</h4>
+                        
+                    </div>
+                </div>
+            </div>  
+    </div>
+{% endblock content %}

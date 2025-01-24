@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from .models import DeviceDetail, ProviderCompanies
+from .models import DeviceDetail
 from django.contrib import messages
 from users.models import Partner, StaffMember
 from django.contrib.auth.decorators import login_required
@@ -68,6 +68,7 @@ def create_device(req):
         hsn_code = req.POST.get("hsn_code")
         image = req.FILES.get("image")
         description = req.POST.get("description")
+        provider_type = req.POST.get("provider_type")
 
         DeviceDetail.objects.create(
             added_by=partner.user,
@@ -81,12 +82,13 @@ def create_device(req):
             in_stock=in_stock,
             hsn_code=hsn_code,
             image=image,
-            description=description
+            description=description,
+            provider_type = provider_type
         )
         messages.success(req,"Device Created Successfully")
 
     device_groups = DeviceDetail.objects.filter(added_by=partner.user).values('device_type').annotate(total_quantity=models.Sum('quantity'))
-    providers = ProviderCompanies.objects.all()
+    providers = ["ISP","Camera Connection"]
     context = {
         "device_groups": device_groups,
         "providers": providers

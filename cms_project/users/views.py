@@ -114,23 +114,42 @@ def create_customer(request):
         zip_code = request.POST.get("pincode")
         addhar_number = request.POST.get("addhar_number")   
         pan_number = request.POST.get("pan_number")
-
+        connection_type = request.POST.get("connection_type")
         plan_type = request.POST.get("plan_type")
         activation_date = timezone.now()
         isp_name = request.POST.get("isp_name")
 
         install_amount = request.POST.get("install_amount") or 0
         bill_amount = request.POST.get("bill_amount") or 0
-        cable_length = request.POST.get("cable_length") or 0
-        cable_type = request.POST.get("cable_type")
-        payment_recieved = request.POST.get("payment_recieved") or 0
-        devices_attached = request.POST.getlist("devices_selected")
-        # print(devices_attached)
-        if devices_attached[0] != "":
-            devices_attached = [int(i) for i in devices_attached]
-        else:
-            devices_attached = []
 
+        payment_recieved = request.POST.get("payment_recieved") or 0
+
+        # cable_length = request.POST.get("cable_length") or 0
+        # cable_type = request.POST.get("cable_type")
+        # devices_attached = request.POST.getlist("devices_selected")
+
+        # print(devices_attached)
+        # devices_attached = devices_attached[0].split(",")
+
+        # if devices_attached[0] != "":
+        #     devices_attached = [
+        #        data.split("-") for data in devices_attached
+        #     ]
+        #     # print(devices_attached)
+        #     devices_attached = [
+        #         {
+        #         "id":int(i[0]),
+        #         "mac":i[1],
+        #         "ip":i[2],
+        #         } 
+        #     for i in devices_attached
+        #     ]
+        # else:
+        #     devices_attached = []
+        
+        
+
+        # print(devices_attached)
 
         if User.objects.filter(email=email).exists():
             messages.error(request, "Email Already Exists")
@@ -142,31 +161,127 @@ def create_customer(request):
         user.set_password(password)
         user.save()
 
-        customer = Customer(user=user, address=address, city=city, state=state, zip_code=zip_code, phone=phone, addhar_number=addhar_number, pan_number=pan_number,partner=partner)
+        customer = Customer(user=user, address=address, city=city, state=state, zip_code=zip_code, phone=phone, addhar_number=addhar_number, pan_number=pan_number,partner=partner,connection_type=connection_type)
         customer.save()
 
         details = AdditionalData.objects.create(plan_type=plan_type, activation_date=activation_date, isp_name=isp_name, customer=customer)
         details.save()
 
-        price_for_devices = 0
-        for device in devices_attached:
-            device = DeviceDetail.objects.get(id=device)
-            attached_device = AttachedDevice.objects.create(device=device, serial_number=0000, mac_address=000)
-            customer.devices.add(attached_device)
-            price_for_devices += device.price_per_unit
+        # price_for_devices = 0
+        # for d in devices_attached:
+        #     device = DeviceDetail.objects.get(id=d["id"])
+        #     attached_device = AttachedDevice.objects.create(device=device, serial_number=d["ip"], mac_address=d["mac"])
+        #     customer.devices.add(attached_device)
+        #     price_for_devices += device.price_per_unit
 
-        cable_price = 0
-        cable = DeviceDetail.objects.get(id=cable_type)
-        cable_price = cable.price_per_unit
-        cable_amount = cable_price * int(cable_length)
-        payment = Payment.objects.create(customer=customer, install_amount=int(install_amount)+price_for_devices, bill_amount=bill_amount, cable_amount=cable_amount, payment_recieved=payment_recieved,balance=0)
-
+        # cable_price = 0
+        # cable = DeviceDetail.objects.get(id=cable_type)
+        # cable_price = cable.price_per_unit
+        # cable_amount = cable_price * int(cable_length)
+        payment = Payment.objects.create(customer=customer, install_amount=int(install_amount), bill_amount=bill_amount, cable_amount=0, payment_recieved=payment_recieved,balance=0)
         messages.success(request, "Customer Created Successfully")
-        return redirect("dashboard")
-    cables = DeviceDetail.objects.filter(device_type="Cable",added_by = partner.user)
-    deivces = DeviceDetail.objects.filter(added_by = partner.user).exclude(device_type="Cable")
+        return redirect("configure-devices",customer.customer_id)
+    # cables = DeviceDetail.objects.filter(device_type="Cable",added_by = partner.user)
+    # deivces = DeviceDetail.objects.filter(added_by = partner.user).exclude(device_type="Cable")
 
-    return render(request, "users/create_customer.html", {"cables":cables,"devices":deivces})
+    return render(request, "users/create_customer.html")
+
+
+
+
+def configure_devices(request,cid):
+    customer = Customer.objects.get(customer_id=cid)
+    isp_devices = DeviceDetail.objects.filter(added_by=customer.partner.user,provider_type="ISP").exclude(device_type="Cable")
+    camera_devices = DeviceDetail.objects.filter(added_by=customer.partner.user,provider_type="Camera Connection").exclude(device_type="Cable")
+    camera_cables = DeviceDetail.objects.filter(device_type="Cable",added_by = customer.partner.user,provider_type="Camera Connection")
+    isp_cables = DeviceDetail.objects.filter(device_type="Cable",added_by = customer.partner.user,provider_type="ISP")
+    return render(request, "users/configure_devices.html",{"customer":customer,"isp_devices":isp_devices,"camera_devices":camera_devices, "isp_cables":isp_cables,"camera_cables":camera_cables})
+
+
+@group_required(("Staff", "Partner","Admin"))
+@transaction.atomic
+def remove_connected_device(request,cid,did):
+    customer = Customer.objects.get(customer_id=cid)
+    device = AttachedDevice.objects.get(id=did)
+    customer.devices.remove(device)
+    customer.save()
+    price_for_devices = 0
+    devices_attached = customer.devices.all()
+    for d in devices_attached:
+        device = d.device
+        # attached_device = AttachedDevice.objects.create(device=device, serial_number=d["ip"], mac_address=d["mac"])
+        # customer.devices.add(attached_device)
+        price_for_devices += device.price_per_unit
+    pay = Payment.objects.get(customer=customer)
+    pay.install_amount = device.price_per_unit
+    pay.save()
+    return redirect("configure-devices",customer.customer_id)
+
+
+@group_required(("Staff", "Partner","Admin"))
+@transaction.atomic
+def add_connected_device(request,cid):
+    customer = Customer.objects.get(customer_id=cid)
+
+    if request.method == "POST":
+        device_attached = request.POST.get("device")
+        device = DeviceDetail.objects.get(id=device_attached)
+        device.stock_value = device.stock_value - 1
+        device.save()
+        mac = request.POST.get("mac")
+        ip = request.POST.get("ip")
+        attached_device = AttachedDevice.objects.create(device=device, serial_number=ip, mac_address=mac)
+        customer.devices.add(attached_device)
+        customer.save()
+        price_for_devices = 0
+        devices_attached = customer.devices.all()
+        for d in devices_attached:
+            device = d.device
+            if device.device_type == "Cable":
+                continue
+            price_for_devices += device.price_per_unit
+        pay = Payment.objects.get(customer=customer)
+        pay.install_amount = price_for_devices
+        pay.save()
+        messages.success(request, "Device Added Successfully")
+        return redirect("configure-devices",customer.customer_id)
+    else:
+        messages.error(request, "Invalid request")
+        return redirect("configure-devices",customer.customer_id)
+    
+
+@transaction.atomic
+@group_required(("Staff", "Partner","Admin"))
+def add_update_cable(request,cid):
+    customer = Customer.objects.get(customer_id=cid)
+    if request.method == "POST":
+        cable_length = request.POST.get("cable_length")
+        cable_type = request.POST.get("cable_type")
+        cable = DeviceDetail.objects.get(id=cable_type)
+        ad = AttachedDevice.objects.create(device=cable, serial_number=cable_length, mac_address=cable_length)
+        customer.devices.add(ad)
+        customer.save()
+        cable_price = cable.price_per_unit
+        cable_cost = cable_price * int(cable_length)
+        pay = Payment.objects.get(customer=customer)
+        pay.cable_amount += cable_cost
+        pay.save()
+        messages.success(request, "Cable Added Successfully")
+        return redirect("configure-devices",customer.customer_id)
+    else:
+        messages.error(request, "Invalid request")
+        return redirect("configure-devices",customer.customer_id)
+
+
+
+@group_required(("Staff", "Partner","Admin"))
+@transaction.atomic
+def activate_user_account(request,cid):
+    customer = Customer.objects.get(customer_id=cid)
+    customer.is_active = True
+    customer.save()
+    messages.success(request, "User Activated Successfully")
+    return redirect("clients")
 
 
 @group_required(("Staff", "Partner","Admin","Technician"))
@@ -241,12 +356,16 @@ def new_conn_dash(request):
     partner = return_user_partner(request)
 
     pending_conn = NewConnectionRequest.objects.filter(partner=partner,status="Pending")
+    camera_connections = NewConnectionRequest.objects.filter(partner=partner,request_type="Camera Connection")
+    new_internet_connections = NewConnectionRequest.objects.filter(partner=partner,request_type="New Internet Connection")
     conersions = NewConnectionRequest.objects.filter(partner=partner,is_completed=True)
-    recent_clients = NewConnectionRequest.objects.filter(partner=partner).order_by("-id")[:5]
+    recent_clients = NewConnectionRequest.objects.filter(partner=partner).order_by("-id")
     context={
         "pending_conn":pending_conn,
         "conersions":conersions,
-        "recent_clients":recent_clients
+        "recent_clients":recent_clients,
+        "new_isp":new_internet_connections,
+        "camera_connections":camera_connections
     }
     return render(request, "users/new_connections_dash.html", context)
 
@@ -321,5 +440,48 @@ def logout_view(request):
 
 
 def client_details(request,pk):
+    if request.method == "POST":
+        phone = request.POST.get("phone_number")
+        address = request.POST.get("address")
+        city = request.POST.get("city")
+        zip_code = request.POST.get("pincode")
+        addhar_number = request.POST.get("addhar_number")   
+        pan_number = request.POST.get("pan_number")
+
+        plan_type = request.POST.get("plan_type")
+        isp_name = request.POST.get("isp_name")
+
+        install_amount = request.POST.get("install_amount") or 0
+        bill_amount = request.POST.get("bill_amount") or 0
+        payment_recieved = request.POST.get("payment_recieved") or 0
+        cable_length = request.POST.get("cable_length") or 0
+
+        # cable = DeviceDetail.objects.get(id=cable_id)
+        # cable_price = cable.price_per_unit
+        # cable_cost = cable_price * int(cable_length)
+
+        customer = Customer.objects.get(id=pk)
+        customer.zip_code = zip_code
+        customer.addhar_number = addhar_number
+        customer.pan_number = pan_number
+        customer.phone = phone
+        customer.address = address
+        customer.city = city
+        customer.save()
+
+        payment = Payment.objects.get(customer=customer)
+        payment.install_amount = install_amount
+        payment.bill_amount = bill_amount
+        payment.payment_recieved = payment_recieved
+        payment.save()
+        ad = AdditionalData.objects.get(customer=customer)
+        ad.plan_type = plan_type
+        ad.isp_name = isp_name
+        ad.save()
+
+
     client = Customer.objects.get(id=pk)
-    return render(request,"users/client_details.html",{"client":client})
+    devices = DeviceDetail.objects.filter(added_by=client.partner.user).exclude(device_type="Cable")
+    cables = DeviceDetail.objects.filter(device_type="Cable",added_by = client.partner.user)
+
+    return render(request,"users/client_details.html",{"client":client,"devices":devices,"cables":cables})

@@ -63,3 +63,12 @@ def create_complaint(request):
         messages.success(request, "Complaint Created Successfully")
 
     return render(request, "complaints/create_complaint.html")
+
+
+@group_required(("Staff","Admin","Partner"))
+def view_complaint(request, pk):
+    complaint = Complaint.objects.get(id=pk)
+    context = {
+        "complaint": complaint
+    }
+    return render(request, "complaints/view_complaint.html", context)
