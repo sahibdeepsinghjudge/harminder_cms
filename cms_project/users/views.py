@@ -99,9 +99,8 @@ def login_view(request):
     return render(request, "users/login.html")
 
 
-
-@group_required(("Staff", "Partner","Admin"))
 @transaction.atomic
+@group_required(("Staff", "Partner","Admin"))
 def create_customer(request):
     partner = return_user_partner(request)
     if request.method == "POST":
@@ -153,7 +152,7 @@ def create_customer(request):
 
         if User.objects.filter(email=email).exists():
             messages.error(request, "Email Already Exists")
-            return redirect("create_customer")
+            return redirect("create-customer")
 
         password = name[:4] + "@" + phone[-4:]
 
@@ -226,7 +225,7 @@ def add_connected_device(request,cid):
     if request.method == "POST":
         device_attached = request.POST.get("device")
         device = DeviceDetail.objects.get(id=device_attached)
-        device.stock_value = device.stock_value - 1
+        device.quantity = device.quantity - 1
         device.save()
         mac = request.POST.get("mac")
         ip = request.POST.get("ip")
